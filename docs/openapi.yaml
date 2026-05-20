@@ -1,0 +1,52 @@
+openapi: 3.0.3
+info:
+  title: Foodie Delivery API
+  version: "1.0"
+  description: >
+    Sanctum-protected JSON API for mobile clients, dispatch, and payments.
+    Base path `/api`. Webhooks are unauthenticated but should be verified with Stripe signatures in production.
+servers:
+  - url: http://localhost/api
+paths:
+  /health:
+    get:
+      summary: Liveness probe
+      responses:
+        "200":
+          description: OK
+  /auth/login:
+    post:
+      summary: Issue Sanctum token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200": { description: Token issued }
+  /orders:
+    get:
+      security: [{ sanctum: [] }]
+      summary: List orders for current principal
+    post:
+      security: [{ sanctum: [] }]
+      summary: Place order
+  /orders/{id}/confirm:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Restaurant confirms (FSM)
+  /riders/location:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Rider GPS ping (throttle:gps)
+components:
+  securitySchemes:
+    sanctum:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
